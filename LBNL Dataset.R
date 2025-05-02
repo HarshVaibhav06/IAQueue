@@ -11,7 +11,7 @@ queue_data <- queue_data_raw %>%
     type_clean = factor(type_clean) 
   )
 
-#1 Number of Projects vs Operational Status
+#1. Number of Projects vs Operational Status
 
 queue_data$q_status <- ifelse(is.na(queue_data$q_status), "unknown", queue_data$q_status)
 
