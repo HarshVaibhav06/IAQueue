@@ -11,7 +11,7 @@ queue_data <- queue_data_raw %>%
     type_clean = factor(type_clean) 
   )
 
-#0 Number of Projects vs Operational Status
+#1 Number of Projects vs Operational Status
 
 queue_data$q_status <- ifelse(is.na(queue_data$q_status), "unknown", queue_data$q_status)
 
@@ -33,7 +33,7 @@ ggplot(status_over_time, aes(x = q_year, y = project_count, color = q_status)) +
   scale_x_continuous(breaks = unique(status_over_time$q_year)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-# 1. Active projects
+#2. Active projects
 active_projects <- queue_data %>% filter(q_status == "active") %>%
   mutate(
     total_mw = rowSums(across(c(mw1, mw2, mw3)), na.rm = TRUE)
@@ -52,7 +52,7 @@ ggplot(tech_summary, aes(x = reorder(type_clean, -project_count), y = project_co
   coord_flip() +
   labs(title = "Number of Active Projects by Technology", x = "Technology", y = "Number of Projects")
 
-#2. Projects by region, by status
+#3. Projects by region, by status
 
 status_by_region <- queue_data %>%
   filter(!is.na(q_status), !is.na(region)) %>%
@@ -71,7 +71,7 @@ ggplot(status_by_region, aes(x = region, y = project_count, fill = q_status)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-#3. Total MW, by type, by status
+#4. Total MW, by type, by status
 
 total_mw_by_type_status <- queue_data %>%
   filter(!is.na(q_status), !is.na(type_clean)) %>%
@@ -94,7 +94,7 @@ ggplot(total_mw_by_type_status, aes(x = reorder(type_clean, -total_mw), y = tota
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-#3a Inference: Solar + Battery vs Solar. Is the MW size different between Solar-only and Solar+Storage projects?
+#4a Inference: Solar + Battery vs Solar. Is the MW size different between Solar-only and Solar+Storage projects?
 
 solar_vs_solar_storage <- queue_data %>%
   filter(type_clean %in% c("Solar", "Solar+Battery")) %>%
@@ -116,7 +116,7 @@ ggplot(solar_vs_solar_storage, aes(x = type_clean, y = total_mw, fill = type_cle
   theme_minimal() +
   theme(legend.position = "none")
 
-#3b ANOVA and TukeyHSD, to check for pairwise significance
+#4b ANOVA and TukeyHSD, to check for pairwise significance
 queue_data$type_clean <- relevel(queue_data$type_clean, ref = "Solar")
 
 anova_result <- aov(total_mw ~ type_clean, data = queue_data)
@@ -138,7 +138,7 @@ tidy(lm_model) %>%
        x = "Project Type (vs. Baseline)",
        y = "Difference in Average Total MW")
 
-#4 Time in ia queue and becoming online after entering queue, by project type
+#5 Time in ia queue and becoming online after entering queue, by project type
 
 # Base cleaning
 queue_data <- queue_data %>%
@@ -216,7 +216,7 @@ ggplot(queue_data_plot_on, aes(x = type_clean, y = days_to_on)) +
   theme_minimal() +
   theme(plot.margin = margin(10, 80, 10, 10))
 
-#5 Projects (count i.e number) by status and type, across/by region
+#6 Projects (count i.e number) by status and type, across/by region
 
 project_summary <- queue_data %>%
   count(region, q_status, type_clean) %>%
@@ -258,7 +258,7 @@ ggplot(project_summary, aes(x = type_clean, y = n, fill = q_status)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-#6 Projects (capacity i.e MW) by status and type, across/by region 
+#7 Projects (capacity i.e MW) by status and type, across/by region 
 
 mw_summary <- queue_data %>%
   group_by(region, q_status, type_clean) %>%
@@ -301,7 +301,7 @@ ggplot(mw_summary, aes(x = type_clean, y = total_mw, fill = q_status)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-#7 POI Congestion
+#8 POI Congestion
 
 poi_congestion <- queue_data %>%
   filter(!is.na(poi_name), !poi_name %in% c("Unknown", "TBD", "tbd", "0")) %>%
@@ -325,7 +325,14 @@ ggplot(top_pois, aes(x = reorder(poi_name, total_mw), y = total_mw)) +
   ) +
   theme_minimal()
 
-#8 Developer Behavior - Top 20 Developers by total MW, and by count
+top_poi_name <- top_pois %>%
+  slice(1) %>%
+  pull(poi_name)
+
+poi_specific_data <- queue_data %>%
+  filter(poi_name == top_poi_name)
+
+#9 Developer Behavior - Top 20 Developers by total MW, and by count
 
 developer_plot_data_mw <- queue_data %>%
   filter(!is.na(developer), developer != "N/A") %>%
