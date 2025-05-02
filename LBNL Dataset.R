@@ -1,6 +1,7 @@
 library(readxl)
 library(tidyverse)
 library(plotly)
+library(broom)
 
 # Load data
 queue_data_raw <- read_excel("C:/Users/Harsh Vaibhav/Downloads/queues_2023_clean_data_r1.xlsx", sheet = "data")
@@ -94,7 +95,7 @@ ggplot(total_mw_by_type_status, aes(x = reorder(type_clean, -total_mw), y = tota
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-#4a Observed disparity between Solar and Solar + Battery. Question: Is the MW size different between Solar-only and Solar+Storage projects?
+#4a Although number of solar projects are more, Solar + Battery has higher MW. Question: Is the MW size truly different between Solar-only and Solar+Storage projects?
 
 solar_vs_solar_storage <- queue_data %>%
   filter(type_clean %in% c("Solar", "Solar+Battery")) %>%
@@ -116,18 +117,17 @@ ggplot(solar_vs_solar_storage, aes(x = type_clean, y = total_mw, fill = type_cle
   theme_minimal() +
   theme(legend.position = "none")
 
-#4b ANOVA and TukeyHSD, to check for pairwise significance
+#4b ANOVA and TukeyHSD, to check for pairwise significance. I'm checking for solar, as an example
 queue_data$type_clean <- relevel(queue_data$type_clean, ref = "Solar")
 
 anova_result <- aov(total_mw ~ type_clean, data = queue_data)
 summary(anova_result)
 
-TukeyHSD(anova_result,conf.level=0.95)
+tukey_result <- TukeyHSD(anova_result)
+head(tukey_result$type_clean, 10)
 
 lm_model <- lm(total_mw ~ type_clean, data = queue_data)
 summary(lm_model)
-
-library(broom)
 
 tidy(lm_model) %>%
   filter(term != "(Intercept)") %>%
