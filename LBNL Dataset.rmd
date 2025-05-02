@@ -1,9 +1,12 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
 ```{r}
 library(readxl)
 library(tidyverse)
 library(plotly)
-install.packages("IRkernel")
-IRkernel::installspec()
 
 # Load data
 queue_data_raw <- read_excel("C:/Users/Harsh Vaibhav/Downloads/queues_2023_clean_data_r1.xlsx", sheet = "data")
@@ -392,3 +395,4 @@ q <- ggplot(developer_plot_data_count, aes(x = reorder(developer, project_count)
 
 # Make interactive
 ggplotly(q, tooltip = "text")
+```

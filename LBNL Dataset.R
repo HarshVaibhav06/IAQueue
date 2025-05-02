@@ -94,7 +94,7 @@ ggplot(total_mw_by_type_status, aes(x = reorder(type_clean, -total_mw), y = tota
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-#4a Inference: Solar + Battery vs Solar. Is the MW size different between Solar-only and Solar+Storage projects?
+#4a Observed disparity between Solar and Solar + Battery. Question: Is the MW size different between Solar-only and Solar+Storage projects?
 
 solar_vs_solar_storage <- queue_data %>%
   filter(type_clean %in% c("Solar", "Solar+Battery")) %>%
